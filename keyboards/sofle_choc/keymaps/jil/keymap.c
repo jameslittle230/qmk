@@ -91,7 +91,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_ARROWS] = LAYOUT(
     _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,    KC_F5,                           KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
-    _______, _______, _______, KC_LCBR, KC_RBRC,  KC_VOLU,                         KC_MNXT, _______, KC_UP,   _______, _______, KC_F12,
+    _______, _______, _______, KC_LCBR, KC_RCBR,  KC_VOLU,                         KC_MNXT, _______, KC_UP,   _______, _______, KC_F12,
     _______, KC_LSFT, _______, KC_LBRC, KC_RBRC,  KC_VOLD,                         KC_MPRV, KC_LEFT, KC_DOWN, KC_RGHT, _______, _______,
     _______, RGB_TOG, _______,  _______, _______, KC_MUTE, _______,       _______, KC_MPLY, _______, _______, _______, _______, _______,
                       _______, _______, _______,  _______, _______,       _______, KC_DEL,  _______, _______, _______
@@ -101,30 +101,94 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
         if (clockwise) {
-            tap_code16(LSA(KC_F2));
+            rgb_matrix_increase_hue_noeeprom();
         } else {
-            tap_code16(LSA(KC_F1));
+            rgb_matrix_decrease_hue_noeeprom();
         }
     } else {
         if (clockwise) {
-            tap_code16(KC_MS_WH_UP);
+            rgb_matrix_step_noeeprom();
         } else {
-            tap_code16(KC_MS_WH_DOWN);
+            rgb_matrix_step_reverse_noeeprom();
+
         }
     }
     return false;
 }
 
-#ifdef OLED_ENABLE
-// Rotate OLED
-// oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-//     return OLED_ROTATION_27 0;
-// }
-// Draw to OLED
+const char* get_rgb_effect_name(uint8_t effect) {
+    switch (effect) {
+        case RGB_MATRIX_NONE: return "None";
+        case RGB_MATRIX_SOLID_COLOR: return "Solid Color";
+        case RGB_MATRIX_ALPHAS_MODS: return "Alphas Mods";
+        case RGB_MATRIX_GRADIENT_UP_DOWN: return "Gradient Up Down";
+        case RGB_MATRIX_GRADIENT_LEFT_RIGHT: return "Gradient Left Right";
+        case RGB_MATRIX_BREATHING: return "Breathing";
+        case RGB_MATRIX_BAND_SAT: return "Band Saturation";
+        case RGB_MATRIX_BAND_VAL: return "Band Value";
+        case RGB_MATRIX_BAND_PINWHEEL_SAT: return "Band Pinwheel Saturation";
+        case RGB_MATRIX_BAND_PINWHEEL_VAL: return "Band Pinwheel Value";
+        case RGB_MATRIX_BAND_SPIRAL_SAT: return "Band Spiral Saturation";
+        case RGB_MATRIX_BAND_SPIRAL_VAL: return "Band Spiral Value";
+        case RGB_MATRIX_CYCLE_ALL: return "Cycle All";
+        case RGB_MATRIX_CYCLE_LEFT_RIGHT: return "Cycle Left Right";
+        case RGB_MATRIX_CYCLE_UP_DOWN: return "Cycle Up Down";
+        case RGB_MATRIX_CYCLE_OUT_IN: return "Cycle Out In";
+        case RGB_MATRIX_CYCLE_OUT_IN_DUAL: return "Cycle Out In Dual";
+        case RGB_MATRIX_RAINBOW_MOVING_CHEVRON: return "Rainbow Moving Chevron";
+        case RGB_MATRIX_CYCLE_PINWHEEL: return "Cycle Pinwheel";
+        case RGB_MATRIX_CYCLE_SPIRAL: return "Cycle Spiral";
+        case RGB_MATRIX_DUAL_BEACON: return "Dual Beacon";
+        case RGB_MATRIX_RAINBOW_BEACON: return "Rainbow Beacon";
+        case RGB_MATRIX_RAINBOW_PINWHEELS: return "Rainbow Pinwheels";
+        // case RGB_MATRIX_FLOWER_BLOOMING: return "Flower Blooming";
+        case RGB_MATRIX_RAINDROPS: return "Raindrops";
+        case RGB_MATRIX_JELLYBEAN_RAINDROPS: return "Jellybean Raindrops";
+        case RGB_MATRIX_HUE_BREATHING: return "Hue Breathing";
+        case RGB_MATRIX_HUE_PENDULUM: return "Hue Pendulum";
+        case RGB_MATRIX_HUE_WAVE: return "Hue Wave";
+        case RGB_MATRIX_PIXEL_FRACTAL: return "Pixel Fractal";
+        case RGB_MATRIX_PIXEL_FLOW: return "Pixel Flow";
+        case RGB_MATRIX_PIXEL_RAIN: return "Pixel Rain";
+        // case RGB_MATRIX_TYPING_HEATMAP: return "Typing Heatmap";
+        // case RGB_MATRIX_DIGITAL_RAIN: return "Digital Rain";
+        // case RGB_MATRIX_SOLID_REACTIVE_SIMPLE: return "Solid Reactive Simple";
+        // case RGB_MATRIX_SOLID_REACTIVE: return "Solid Reactive";
+        // case RGB_MATRIX_SOLID_REACTIVE_WIDE: return "Solid Reactive Wide";
+        // case RGB_MATRIX_SOLID_REACTIVE_MULTIWIDE: return "Solid Reactive Multiwide";
+        // case RGB_MATRIX_SOLID_REACTIVE_CROSS: return "Solid Reactive Cross";
+        // case RGB_MATRIX_SOLID_REACTIVE_MULTICROSS: return "Solid Reactive Multicross";
+        // case RGB_MATRIX_SOLID_REACTIVE_NEXUS: return "Solid Reactive Nexus";
+        // case RGB_MATRIX_SOLID_REACTIVE_MULTINEXUS: return "Solid Reactive Multinexus";
+        // case RGB_MATRIX_SPLASH: return "Splash";
+        // case RGB_MATRIX_MULTISPLASH: return "Multisplash";
+        // case RGB_MATRIX_SOLID_SPLASH: return "Solid Splash";
+        // case RGB_MATRIX_SOLID_MULTISPLASH: return "Solid Multisplash";
+        // case RGB_MATRIX_STARLIGHT: return "Starlight";
+        // case RGB_MATRIX_STARLIGHT_DUAL_HUE: return "Starlight Dual Hue";
+        // case RGB_MATRIX_STARLIGHT_DUAL_SAT: return "Starlight Dual Saturation";
+        // case RGB_MATRIX_RIVERFLOW: return "Riverflow";
+        default: return "Unknown";
+    }
+}
+
+// Override the layer state set function
+layer_state_t layer_state_set_user(layer_state_t state) {
+    // TODO: temporarily switch into solid color LED mode when switching to
+    // a non-default layer
+    return state;
+}
+
+void keyboard_post_init_user(void) {
+    // Enable RGB lighting if it's not already enabled
+    rgblight_enable();
+    // Set the initial RGB color for the default layer
+    rgblight_sethsv_noeeprom(HSV_RED);
+}
+
 bool oled_task_user() {
-    // Set cursor position
-    oled_set_cursor(0, 1);
-    // Switch on current active layer
+    oled_clear();
+    oled_set_cursor(0, 0);
     switch (get_highest_layer(layer_state)) {
         case _ARROWS :
             oled_write("Arrow Layer", false);
@@ -133,6 +197,11 @@ bool oled_task_user() {
             oled_write("Default Layer", false);
             break;
     }
+
+    uint8_t rgb_mode = rgblight_get_mode();
+    const char* rgb_effect_name = get_rgb_effect_name(rgb_mode);
+
+    oled_set_cursor(0, 1);
+    oled_write(rgb_effect_name, false);
     return false;
 }
-#endif
