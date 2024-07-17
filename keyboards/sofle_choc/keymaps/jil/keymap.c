@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "raw_hid.h"
 
 // lt = layer toggle
 #define LT_F LT(_ARROWS, KC_F)
@@ -142,18 +143,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
-        if (clockwise) {
-            rgb_matrix_increase_hue_noeeprom();
-        } else {
-            rgb_matrix_decrease_hue_noeeprom();
-        }
+        clockwise ? rgb_matrix_increase_hue() : rgb_matrix_decrease_hue();
     } else {
-        if (clockwise) {
-            rgb_matrix_step_noeeprom();
-        } else {
-            rgb_matrix_step_reverse_noeeprom();
-
-        }
+        clockwise ? rgb_matrix_step() : rgb_matrix_step_reverse();
     }
     return false;
 }
@@ -163,41 +155,59 @@ void keyboard_post_init_user(void) {
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    return OLED_ROTATION_270;
+    return is_keyboard_master() ? OLED_ROTATION_270 : rotation;
 }
 
 bool caps_word_active = false;
 
 bool oled_task_user() {
     oled_clear();
-    oled_set_cursor(0, 0);
-    switch (get_highest_layer(layer_state)) {
-        case _ARROWS:
-            oled_write("arrow", false);
-            break;
-        case _NUMPAD:
-            oled_write("num", false);
-            break;
-        default:
-            oled_write("alpha", false);
-            break;
+    if (is_keyboard_master()) {
+        oled_set_cursor(0, 0);
+        switch (get_highest_layer(layer_state)) {
+            case _ARROWS:
+                oled_write("arrow", false);
+                break;
+            case _NUMPAD:
+                oled_write("num", false);
+                break;
+            default:
+                oled_write("alpha", false);
+                break;
+        }
+
+        uint8_t rgb_mode = rgblight_get_mode();
+
+        oled_set_cursor(0, 1);
+        oled_write("l ", false);
+        oled_write(get_u8_str(rgb_mode, ' '), false);
+
+        oled_set_cursor(0, 2);
+        oled_write("h ", false);
+        oled_write(get_u8_str(rgb_matrix_get_hsv().h, ' '), false);
+
+        oled_set_cursor(0, 3);
+        oled_write("wc", false);
+        oled_write(get_u8_str(get_current_wpm(), ' '), false);
+
+        oled_set_cursor(0, 4);
+        oled_write(caps_word_active ? "caps" : "    ", false);
     }
 
-    uint8_t rgb_mode = rgblight_get_mode();
-    oled_set_cursor(0, 1);
-    oled_write("l ", false);
-    oled_write(get_u8_str(rgb_mode, ' '), false);
-    oled_set_cursor(0, 2);
-    oled_write("h ", false);
-    oled_write(get_u8_str(rgb_matrix_get_hsv().h, ' '), false);
-    oled_set_cursor(0, 3);
-    oled_write("wc", false);
-    oled_write(get_u8_str(get_current_wpm(), ' '), false);
-    oled_set_cursor(0, 4);
-    oled_write(caps_word_active ? "caps" : "    ", false);
     return false;
 }
 
 void caps_word_set_user(bool active) {
     caps_word_active = active;
+}
+
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+    // uint8_t response[length];
+    // memset(response, 0, length);
+    // response[0] = 'B';
+
+    // // Extract the index from the first two bytes
+    // uint16_t index = (data[0] << 8) | data[1];
+    // memcpy(&raw_logo[index], &data[2], length - 2);
+    // raw_hid_send(response, length);    
 }
