@@ -4,6 +4,7 @@ BOOTLOADER = atmel-dfu
 RGB_MATRIX_ENABLE = yes
 WPM_ENABLE = yes
 CAPS_WORD_ENABLE = yes
+MOUSEKEY_ENABLE = yes
 # RAW_ENABLE = yes
 
 # space saving

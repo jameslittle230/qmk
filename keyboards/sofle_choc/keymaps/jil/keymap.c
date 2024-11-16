@@ -19,6 +19,7 @@
 // lt = layer toggle
 #define LT_F LT(_ARROWS, KC_F)
 #define LT_J LT(_ARROWS, KC_J)
+
 #define LT_D LT(_NUMPAD, KC_D)
 #define LT_K LT(_NUMPAD, KC_K)
 
@@ -42,6 +43,16 @@ enum custom_keycodes {
     JL_RCBR,
     JL_LBRC,
     JL_RBRC,
+    JLM_ARRW,
+    JLM_IF,
+    JLM_CLOG,
+    JLM_TRYC,
+    JLM_FUNC,
+    JLM_CLBK,
+    JLM_CLTG,
+    JLM_NAME,
+    JLM_PHON,
+    JLM_EMAL,
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -95,49 +106,87 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (!(get_mods() & (MOD_BIT(KC_LSFT) | MOD_BIT(KC_RSFT)))) { SEND_STRING("]"); }
             }
             return false;
+
+        // Macros
+        case JLM_ARRW:
+            if(record->event.pressed) {
+                SEND_STRING("() => {}");
+                SEND_STRING(SS_TAP(X_LEFT));
+            }
+            return false;
+        case JLM_IF:
+            if(record->event.pressed) {
+                SEND_STRING("if() {}");
+                for(int i=0; i<4; i++) {
+                    SEND_STRING(SS_TAP(X_LEFT));
+                }
+            }
+            return false;
+        case JLM_CLOG:
+            if(record->event.pressed) {
+                SEND_STRING("console.log('JIL', );");
+                SEND_STRING(SS_TAP(X_LEFT));
+                SEND_STRING(SS_TAP(X_LEFT));
+            }
+            return false;
+        case JLM_TRYC:
+            if(record->event.pressed) {
+                SEND_STRING("try {} catch(error) {}");
+                for(int i=0; i<17; i++) {
+                    SEND_STRING(SS_TAP(X_LEFT));
+                }
+            }
+            return false;
+        case JLM_FUNC:
+            if(record->event.pressed) {
+                SEND_STRING("const  = () => {}");
+                for(int i=0; i<11; i++) {
+                    SEND_STRING(SS_TAP(X_LEFT));
+                }
+            }
+            return false;
+        case JLM_CLTG:
+            if(record->event.pressed) { SEND_STRING("</"); }
+            return false;
+        case JLM_CLBK:
+            if(record->event.pressed) { SEND_STRING("/>"); }
+            return false;
+        case JLM_NAME:
+            if(record->event.pressed) { SEND_STRING("---"); }
+            return false;
+        case JLM_PHON:
+            if(record->event.pressed) { SEND_STRING("---"); }
+            return false;
+        case JLM_EMAL:
+            if(record->event.pressed) { SEND_STRING("---"); }
+            return false;
     }
     return true;  // Process all other keycodes normally
 }
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    /*
-     * QWERTY
-     * ,-----------------------------------------.                    ,-----------------------------------------.
-     * |  `   |   1  |   2  |   3  |   4  |   5  |                    |   6  |   7  |   8  |   9  |   0  |  `   |
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-     * | ESC  |   Q  |   W  |   E  |   R  |   T  |                    |   Y  |   U  |   I  |   O  |   P  | Bspc |
-     * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
-     * | Tab  |   A  |   S  |   D  |   F  |   G  |-------.    ,-------|   H  |   J  |   K  |   L  |   ;  |  '   |
-     * |------+------+------+------+------+------|  Mute |    | Pause |------+------+------+------+------+------|
-     * |LShift|   Z  |   X  |   C  |   V  |   B  |-------|    |-------|   N  |   M  |   ,  |   .  |   /  |RShift|
-     * `-----------------------------------------/       /     \      \-----------------------------------------'
-     *            | LCTL | LGUI | LCMD | LALT | /Enter  /       \Space \  | RALT | RCMD | RGUI | RCTL |
-     *            |      |      |      |      |/       /         \      \ |      |      |      |      |
-     *            `----------------------------------'           '------''---------------------------'
-     */
-
 [_QWERTY] = LAYOUT(
-    KC_GRV,   KC_1,  KC_2,    KC_3,    KC_4,    KC_5,                                          KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_EQL,
-    KC_TAB,   KC_Q,  KC_W,    KC_E,    KC_R,    KC_T,                                          KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,
-    JL_MEH,   KC_A,  KC_S,    LT_D,    LT_F,    KC_G,                                          KC_H,    LT_J,    LT_K,    KC_L,    KC_SCLN, KC_QUOT,
-    KC_LSFT,  KC_Z,  KC_X,    KC_C,    KC_V,    KC_B,    KC_MUTE,                   KC_MPLY,   KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
-                     KC_LCTL, KC_LALT, KC_LGUI, KC_SPC,  KC_ENT,            KC_ESC, KC_BSPC,   KC_RGUI, KC_RALT, KC_RCTL
+    KC_GRV,   KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,                                     KC_CIRC, KC_AMPR, KC_ASTR, _______, _______, KC_EQL,
+    KC_TAB,   KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                                        KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,
+    JL_MEH,   KC_A,    KC_S,    LT_D,    LT_F,    KC_G,                                        KC_H,    LT_J,    LT_K,    KC_L,    KC_SCLN, KC_QUOT,
+    KC_LSFT,  KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    _______,                 _______,   KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
+                       KC_LCTL, KC_LALT, KC_LGUI, KC_SPC,  KC_ENT,          KC_ESC, KC_BSPC,   KC_RGUI, KC_RALT, KC_RCTL
 ),
 
 [_ARROWS] = LAYOUT(
-    _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,    KC_F5,                           KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
-    _______, _______, _______, JL_LCBR, JL_RCBR,  _______,                         OS_LEFT, O_LEFT,  KC_UP,   O_RGHT,  OS_RGHT, KC_F12,
-    _______, _______, _______, JL_LBRC, JL_RBRC,  _______,                         SW_LEFT, KC_LEFT, KC_DOWN, KC_RGHT, SW_RGHT, _______,
-    _______, _______, _______,  KC_LPRN, KC_RPRN, _______, _______,       _______, _______, _______, _______, _______, _______, _______,
+    _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,    KC_F5,                           KC_F6,    KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
+    _______, _______, _______, JL_LBRC, JL_RBRC,  _______,                         _______,  O_LEFT,  KC_UP,   O_RGHT,  _______, KC_F12,
+    _______, _______, _______, JL_LCBR, JL_RCBR,  _______,                         _______,  KC_LEFT, KC_DOWN, KC_RGHT, _______, _______,
+    _______, _______, _______, KC_LPRN, KC_RPRN,  _______, _______,       _______, JLM_CLTG, KC_LABK, KC_RABK, JLM_CLBK, _______, _______,
                       _______, _______, _______,  _______, _______,       KC_DEL,  _______,  _______, _______, _______
 ),
 
 [_NUMPAD] = LAYOUT(
-    _______, _______, _______, _______, _______,  _______,                         _______, KC_NUM,  KC_PEQL, KC_PSLS, KC_PAST, _______,
-    _______, _______, _______, _______, _______,  _______,                         _______, KC_KP_7, KC_KP_8, KC_KP_9, KC_PMNS, _______,
-    _______, _______, _______, _______, _______,  _______,                         _______, KC_KP_4, KC_KP_5, KC_KP_6, KC_PPLS, _______,
-    _______, _______, _______,  _______, _______, _______, _______,       _______, _______, KC_KP_1, KC_KP_2, KC_KP_3, KC_PENT, _______,
-                      _______, _______, _______,  _______, _______,       QK_BOOT, _______, KC_KP_0, KC_KP_0, KC_PDOT
+    QK_BOOT, _______, _______, _______,  _______,  _______,                        _______,   _______, _______, _______, _______, _______,
+    _______, _______, _______, JLM_TRYC, JLM_IF,   JLM_NAME,                       _______,   KC_KP_7, KC_KP_8, KC_KP_9, _______, _______,
+    _______, _______, _______, JLM_FUNC, JLM_ARRW, JLM_PHON,                       KC_KP_DOT, KC_KP_4, KC_KP_5, KC_KP_6, _______, _______,
+    _______, _______, _______, _______,  JLM_CLOG, JLM_EMAL, _______,     _______, KC_KP_0,   KC_KP_1, KC_KP_2, KC_KP_3, _______, _______,
+                      _______, _______,  _______,  _______,  _______,     _______, _______,   KC_KP_0, KC_KP_DOT, _______
 ),
 };
 
@@ -152,6 +201,8 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
 
 void keyboard_post_init_user(void) {
     rgblight_enable();
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_TYPING_HEATMAP);
+    rgb_matrix_sethsv_noeeprom(HSV_BLUE);
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
@@ -199,15 +250,4 @@ bool oled_task_user() {
 
 void caps_word_set_user(bool active) {
     caps_word_active = active;
-}
-
-void raw_hid_receive(uint8_t *data, uint8_t length) {
-    // uint8_t response[length];
-    // memset(response, 0, length);
-    // response[0] = 'B';
-
-    // // Extract the index from the first two bytes
-    // uint16_t index = (data[0] << 8) | data[1];
-    // memcpy(&raw_logo[index], &data[2], length - 2);
-    // raw_hid_send(response, length);    
 }
